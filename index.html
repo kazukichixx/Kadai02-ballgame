@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Ball Simulation</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<style>
+  #canvas {
+    width: 100%;
+    height: 400px;
+    background-color:gray
+    border: 2px solid #e5e7eb;
+  }
+  
+  canvas {
+    display: block;
+    margin: auto;
+    background-color:black
+  }
+  .square {
+    width: 100px;
+    height: 100px;
+    background-color:white;
+    margin: 20px auto;
+  }
+
+</style>
+</head>
+<header>
+<h1>Ballgame</h1>
+</header>
+<body class="bg-gray-100 flex flex-col items-center justify-center p-4">
+    
+<div id="canvas">
+  <canvas id="ballCanvas"></canvas>
+</div>
+
+<div class="flex space-x-4 my-4">
+  <button id="startBtn" class="px-4 py-2 bg-blue-500 text-white rounded">START</button>
+  <button id="resetBtn" class="px-4 py-2 bg-red-500 text-white rounded">RESET</button>
+</div>
+<div class="flex space-x-4 my-4">
+  <button id="speedFast" class="px-4 py-2 bg-green-500 text-white rounded">Fast</button>
+  <button id="speedMedium" class="px-4 py-2 bg-yellow-500 text-white rounded">Medium</button>
+</div>
+
+<script>
+  const canvas = document.getElementById('ballCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 600;
+  canvas.height = 400;
+
+  let x = canvas.width / 2;
+  let y = canvas.height - 30;
+  let dx = 2;
+  let dy = -2;
+  let ballRadius = 10;
+  let animationFrameId;
+
+  function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBall();
+    if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+      dx = -dx;
+    }
+    if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+      dy = -dy;
+    }
+    x += dx;
+    y += dy;
+  }
+  let balls = [{ x: canvas.width / 2, y: canvas.height - 30, dx: 2, dy: -2 }];
+
+  
+  function addBall() {
+    let newBall = {
+      x: canvas.width / 2,
+      y: canvas.height - 30,
+      dx: (Math.random() < 0.5 ? -1 : 1) * (2 + Math.random() * 2),
+      dy: -2 - Math.random() * 2
+    };
+    balls.push(newBall);
+  }
+
+  function drawBalls() {
+    balls.forEach(ball => {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI*2);
+      ctx.fillStyle = "#0095DD";
+      ctx.fill();
+      ctx.closePath();
+    });
+  }
+
+  function updateBallPositions() {
+    balls.forEach(ball => {
+      if(ball.x + ball.dx > canvas.width-ballRadius || ball.x + ball.dx < ballRadius) {
+        ball.dx = -ball.dx;
+      }
+      if(ball.y + ball.dy > canvas.height-ballRadius || ball.y + ball.dy < ballRadius) {
+        ball.dy = -ball.dy;
+      }
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBalls();
+    updateBallPositions();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', function() {
+    addBall();
+    startAnimation();
+  });
+
+  function startAnimation() {
+    clearInterval(animationFrameId);
+    animationFrameId = setInterval(draw, 10);
+  }
+
+  function stopAnimation() {
+    clearInterval(animationFrameId);
+  }
+
+  function resetAnimation() {
+    x = canvas.width/2;
+    y = canvas.height-30;
+    dx = 2;
+    dy = -2;
+    draw();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startAnimation);
+  
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    balls = []; // Clear all balls from the array
+    resetAnimation();
+  });
+  
+  document.getElementById('speedFast').addEventListener('click', function() {
+    balls.forEach(ball => {
+      ball.dx *= 2; // Double the horizontal speed of each ball
+      ball.dy *= 2; // Double the vertical speed of each ball
+    });
+  });
+
+  document.getElementById('speedMedium').addEventListener('click', function() {
+    balls.forEach(ball => {
+      ball.dx /= 2; // Halve the horizontal speed of each ball
+      ball.dy /= 2; // Halve the vertical speed of each ball
+    });
+  });
+</script>
+</body>
+</html>
